@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Chatbot</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f9f9f9;
+    }
+
+    #chat-container {
+      background-image: linear-gradient(rgb(207, 198, 198), rgb(152, 148, 148));
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      height: 90%;
+      max-height: 700px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    #chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background-color: #fff;
+      border-top: 2px solid #ccc;
+    }
+
+    .user-message {
+      text-align: right;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      margin-bottom: 5px;
+      word-wrap: break-word;
+    }
+
+    .bot-message {
+      text-align: left;
+      padding: 10px;
+      background-color: #e0f0e0;
+      border-radius: 10px;
+      margin-bottom: 5px;
+      word-wrap: break-word;
+    }
+
+    form {
+      display: flex;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-top: 2px solid #ccc;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button img {
+      width: 20px;
+      height: 20px;
+    }
+
+    #loader {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .note {
+      font-size: 1rem;
+      padding: 10px;
+      background-color: #fff;
+      border-bottom: 2px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      .note {
+        font-size: 0.9rem;
+      }
+
+      button img {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #chat-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+      }
+
+      h1 {
+        font-size: 1rem;
+      }
+
+      .note {
+        font-size: 0.8rem;
+      }
+
+      input {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>Dr. Bot &#129309;</h1>
+    <div class="note">
+      <b>NOTE:</b>
+      <ul>
+        <li>Ask your questions to the chatbot for accurate answers.</li>
+      </ul>
+    </div>
+    <div id="chat-history"></div>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Enter your message">
+      <button type="submit"><img src="https://cdn4.iconfinder.com/data/icons/mail-message-6/32/mail-16-512.png" alt="Send"></button>
+    </form>
+  </div>
+  <div id="loader">
+    <img src="loader.gif" width="150px" alt="Loading...">
+  </div>
+  <script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const form = document.getElementById('chat-form');
+
+    async function sendMessage() {
+      const userMessage = userInput.value;
+      userInput.value = ''; // Clear input field
+
+      chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userInput: userMessage }),
+        });
+
+        const data = await response.json();
+        const botMessage = data.response;
+
+        chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      } catch (error) {
+        console.error('Error:', error);
+        chatHistory.innerHTML += `<div class="bot-message">Something went wrong. Please try again.</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendMessage();
+    });
+  </script>
+</body>
+</html>
